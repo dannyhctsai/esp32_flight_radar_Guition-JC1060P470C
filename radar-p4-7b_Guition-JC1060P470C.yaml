@@ -9,6 +9,10 @@ esp32:
   framework:
     type: esp-idf
 
+# 啟動必要組件 (解決編譯報錯)
+esp_ldo:
+psram:
+
 wifi:
   ssid: "YOUR_WIFI_SSID"
   password: "YOUR_WIFI_PASSWORD"
@@ -70,7 +74,3 @@ lvgl:
   touchscreens:
     - my_touch
   buffer_size: 25%
-
-# 若需要保留原本航班雷達的 UI / 資料來源 packages，可在此引入：
-# packages:
-#   radar_core: !include radar_ui_elements.yaml
