@@ -29,6 +29,7 @@ substitutions:
 display:
   - platform: mipi_dsi
     id: my_display
+    model: jc1060p470  # 補上必要的 model 參數
     width: 1024
     height: 600
     dimensions:
