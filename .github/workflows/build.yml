@@ -33,5 +33,5 @@ jobs:
         with:
           name: firmware-bin
           path: |
-            .esphome/build/radar-p4-7b/.pio/build/radar-p4-7b/*.bin
-            .esphome/build/radar-p4-7b/.pio/build/radar-p4-7b/*.elf
+            .esphome/**/*.bin
+            .esphome/**/*.elf
