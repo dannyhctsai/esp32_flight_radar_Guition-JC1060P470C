@@ -24,4 +24,4 @@ jobs:
           pip install esphome
 
       - name: Compile ESPHome YAML
-        run: esphome compile esp32_flight_radar_jc1060p470c.yaml
+        run: esphome compile radar-p4-7b_Guition-JC1060P470C.yaml
