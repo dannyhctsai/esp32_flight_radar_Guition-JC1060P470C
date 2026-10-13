@@ -1,0 +1,76 @@
+esphome:
+  name: esp32-flight-radar-jc1060p470c
+  friendly_name: ESP32 Flight Radar JC1060P470C
+  comment: "Migrated to Guition JC1060P470C based on official schematic"
+  min_version: 2026.4.0
+
+esp32:
+  board: esp32-p4
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: "YOUR_WIFI_SSID"
+  password: "YOUR_WIFI_PASSWORD"
+
+api:
+ota:
+  platform: esphome
+
+substitutions:
+  screen_width: "1024"
+  screen_height: "600"
+
+# 螢幕顯示設定 (MIPI-DSI 7吋 1024x600)
+display:
+  - platform: mipi_dsi
+    id: my_display
+    width: 1024
+    height: 600
+    dimensions:
+      width: 1024
+      height: 600
+    update_interval: 16ms
+
+# 背光控制 (對應電路圖 MP3202 / LCD_PWM -> GPIO24)
+output:
+  - platform: ledc
+    pin: GPIO24
+    id: backlight_pwm
+    frequency: 1000Hz
+
+light:
+  - platform: monochromatic
+    output: backlight_pwm
+    name: "LCD Backlight"
+    id: lcd_backlight
+    default_transition_length: 0s
+
+# 電容觸控設定 (對應 FPC2 觸控介面與 GPIO21/GPIO22)
+touchscreen:
+  - platform: ft5x06  # 依實際觸控IC調整 (如 gt911 等)
+    id: my_touch
+    display: my_display
+    interrupt_pin: GPIO21
+    reset_pin: GPIO22
+    address: 0x38     # 常見電容觸控 I2C 地址
+
+# 音訊擴大機控制 (對應 PA_CTRL -> GPIO20)
+switch:
+  - platform: gpio
+    pin: GPIO20
+    name: "Audio PA Enable"
+    id: audio_pa
+
+# LVGL 圖形介面核心
+lvgl:
+  id: my_lvgl
+  displays:
+    - my_display
+  touchscreens:
+    - my_touch
+  buffer_size: 25%
+
+# 若需要保留原本航班雷達的 UI / 資料來源 packages，可在此引入：
+# packages:
+#   radar_core: !include radar_ui_elements.yaml
