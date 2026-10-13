@@ -1,77 +1,122 @@
 esphome:
-  name: esp32-flight-radar-jc1060p470c
-  friendly_name: ESP32 Flight Radar JC1060P470C
-  comment: "Migrated to Guition JC1060P470C based on official schematic"
-  min_version: 2026.4.0
+  name: "esp32-flight-radar-jc1060p470c"
+  friendly_name: "ESP32 Flight Radar JC1060P470C"
+  platformio_options:
+    build_flags:
+      - "-Wno-deprecated-declarations"
+    build_src_flags:
+      - "-Wno-literal-suffix"
 
 esp32:
-  board: esp32-p4
+  variant: esp32p4
+  flash_size: 16MB
+  cpu_frequency: 360MHZ
+  engineering_sample: true
   framework:
     type: esp-idf
+    advanced:
+      enable_idf_experimental_features: true
+      disable_vfs_support_termios: false
+      disable_vfs_support_select: false
+      disable_vfs_support_dir: false
+    sdkconfig_options:
+      CONFIG_SDMMC_HOST_DEFAULT: "y"
+      CONFIG_COMPILER_OPTIMIZATION_SIZE: "y"
+      CONFIG_FREERTOS_THREAD_LOCAL_STORAGE_POINTERS: "1"
+      CONFIG_LOG_DEFAULT_LEVEL: "2"
 
-# 啟動必要組件 (解決編譯報錯)
-esp_ldo:
 psram:
+  mode: hex
+  speed: 200MHz
+
+logger:
+  level: WARN
+
+api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
 
 wifi:
+  reboot_timeout: 15min
+  power_save_mode: LIGHT
+  fast_connect: False
+  enable_btm: False
+  enable_rrm: False
+  passive_scan: False
+  enable_on_boot: True
+  post_connect_roaming: True
+  min_auth_mode: WPA2
   ssid: "YOUR_WIFI_SSID"
   password: "YOUR_WIFI_PASSWORD"
 
-api:
-ota:
-  platform: esphome
+esp32_hosted:
+  variant: esp32c6
+  reset_pin: GPIO54
+  cmd_pin: GPIO19
+  clk_pin: GPIO18
+  d0_pin: GPIO14
+  d1_pin: GPIO15
+  d2_pin: GPIO16
+  d3_pin: GPIO17
+  active_high: true
 
-substitutions:
-  screen_width: "1024"
-  screen_height: "600"
+esp_ldo:
+  - channel: 3
+    id: dsi_phy_enable
+    voltage: 2.5V
+    adjustable: True
+  - channel: 4
+    id: sd_card_power
+    voltage: 2.7V
+    adjustable: True
 
-# 螢幕顯示設定 (MIPI-DSI 7吋 1024x600)
-display:
-  - platform: mipi_dsi
-    id: my_display
-    model: jc1060p470  # 補上必要的 model 參數
-    width: 1024
-    height: 600
-    dimensions:
-      width: 1024
-      height: 600
-    update_interval: 16ms
-
-# 背光控制 (對應電路圖 MP3202 / LCD_PWM -> GPIO24)
 output:
   - platform: ledc
-    pin: GPIO24
-    id: backlight_pwm
-    frequency: 1000Hz
+    pin: GPIO23
+    id: gpio_backlight_pwm
 
 light:
   - platform: monochromatic
-    output: backlight_pwm
-    name: "LCD Backlight"
-    id: lcd_backlight
+    output: gpio_backlight_pwm
+    name: Display Backlight
+    icon: mdi:lightbulb-on
+    id: display_backlight
+    restore_mode: ALWAYS_ON
     default_transition_length: 0s
+    gamma_correct: 1.0
 
-# 電容觸控設定 (對應 FPC2 觸控介面與 GPIO21/GPIO22)
+i2c:
+  - id: bus_a
+    sda: GPIO07
+    scl: GPIO08
+    frequency: 400kHz
+    sda_pullup_enabled: False
+    scl_pullup_enabled: False
+
 touchscreen:
-  - platform: ft5x06  # 依實際觸控IC調整 (如 gt911 等)
-    id: my_touch
-    display: my_display
-    interrupt_pin: GPIO21
+  - platform: gt911
+    id: my_touchscreen
+    i2c_id: bus_a
     reset_pin: GPIO22
-    address: 0x38     # 常見電容觸控 I2C 地址
+    interrupt_pin: GPIO21
 
-# 音訊擴大機控制 (對應 PA_CTRL -> GPIO20)
-switch:
-  - platform: gpio
-    pin: GPIO20
-    name: "Audio PA Enable"
-    id: audio_pa
+display:
+  - platform: mipi_dsi
+    id: my_display
+    model: JC1060P470
+    color_order: RGB
+    reset_pin:
+      number: GPIO05
+    rotation: 0
+    update_interval: never
+    auto_clear_enabled: false
 
-# LVGL 圖形介面核心
 lvgl:
   id: my_lvgl
   displays:
     - my_display
   touchscreens:
-    - my_touch
+    - my_touchscreen
   buffer_size: 25%
