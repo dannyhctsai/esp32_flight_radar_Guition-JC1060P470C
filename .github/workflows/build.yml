@@ -1,4 +1,4 @@
-name: Build ESP-IDF Firmware
+name: Build ESPHome Firmware
 
 on: [push, workflow_dispatch]
 
@@ -9,18 +9,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          ref: lvgl9
           submodules: 'recursive'
 
-      - name: Build with ESP-IDF
-        uses: espressif/esp-idf-ci-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          esp_idf_version: v5.3.1
-          target: esp32p4
+          python-version: '3.11'
+
+      - name: Install ESPHome
+        run: |
+          pip install --upgrade pip
+          pip install 'esphome==2026.6.*'
+
+      - name: Compile ESPHome project
+        run: |
+          esphome compile radar-p4-7b.yaml
 
       - name: Upload firmware binary
         uses: actions/upload-artifact@v4
         with:
           name: firmware-bin
           path: |
-            build/*.bin
-            build/*.elf
+            .esphome/build/flight-radar/.pio/build/flight-radar/*.bin
+            .esphome/build/flight-radar/.pio/build/flight-radar/*.elf
