@@ -9,7 +9,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: lvgl9
+          repository: 'delphicchen/esp32_flight_radar'
+          ref: 'lvgl9'
           fetch-depth: 0
           submodules: 'recursive'
 
