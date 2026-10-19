@@ -26,11 +26,8 @@ jobs:
       - name: Compile ESPHome YAML
         run: esphome compile radar-p4-7b_Guition-JC1060P470C.yaml
 
-      - name: Upload Firmware Bin
-        uses: actions/upload-artifact@v4
-        with:
-          name: firmware
-          path: |
-            .esphome/build/**/*.bin
-            **/firmware.bin
-          if-no-files-found: ignore
+      - name: List all files to find binary
+        run: |
+          echo "=== Searching for build outputs ==="
+          find . -name "*.bin" -o -name "*.elf"
+          find .esphome -type f 2>/dev/null || true
