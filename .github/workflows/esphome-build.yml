@@ -24,7 +24,7 @@ jobs:
           pip install esphome
 
       - name: Compile ESPHome YAML
-        run: esphome compile radar-p4-7b_Guition-JC1060P470.yaml
+        run: esphome compile radar-p4-7b_Guition-JC1060P470C.yaml
 
       - name: Upload Firmware Bin
         uses: actions/upload-artifact@v4
