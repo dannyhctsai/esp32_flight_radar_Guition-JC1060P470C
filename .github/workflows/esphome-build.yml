@@ -13,7 +13,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build ESPHome Package
-        uses: esphome/build-action@v2
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          yaml_file: radar-p4-7b_Guition-JC1060P470.yaml
+          python-version: '3.11'
+
+      - name: Install ESPHome
+        run: |
+          python -m pip install --upgrade pip
+          pip install esphome
+
+      - name: Compile ESPHome YAML
+        run: esphome compile radar-p4-7b_Guition-JC1060P470.yaml
+
+      - name: Upload Firmware Bin
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: .esphome/build/esp32-flight-radar-jc1060p470c/.pio/build/esp32-flight-radar-jc1060p470c/firmware.bin
+          if-no-files-found: ignore
