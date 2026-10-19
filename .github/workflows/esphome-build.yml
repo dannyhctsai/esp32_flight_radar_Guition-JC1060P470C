@@ -30,5 +30,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: firmware
-          path: .esphome/build/**/firmware.bin
-          if-no-files-found: error
+          path: |
+            .esphome/build/**/*.bin
+            **/firmware.bin
+          if-no-files-found: ignore
